@@ -1,0 +1,47 @@
+name: testes
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  testes:
+    runs-on: ${{ matrix.so }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        so: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # O juiz e o mesmo minimax SEM memoria nenhuma, recalculando tudo toda vez.
+      # Ele nao compartilha a tabela com ninguem, e por isso serve para conferir o
+      # que a versao com memoria afirma. A regra das duas linhas tambem nao e
+      # citada: ela e conferida nas 99 posicoes que existem ate nove colunas.
+      - name: testes
+        run: dotnet test testes/Chomp.Testes/Chomp.Testes.csproj -c Release --nologo -v q
+
+      - name: toda barra ate sete por sete
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- barras
+
+      - name: as barras quadradas
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- quadrados
+
+      - name: o argumento do roubo, conferido
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- roubo
+
+      - name: chomp de duas linhas
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- duaslinhas
+
+      - name: a memoria contra a forca bruta pura
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- juiz
+
+      - name: a maior barra que cabe
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- maior
